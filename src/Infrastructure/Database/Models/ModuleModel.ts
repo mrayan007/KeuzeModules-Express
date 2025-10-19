@@ -26,6 +26,6 @@ const ModuleSchema = new Schema<IModuleDocument>({
     learningoutcomes: String
 });
 
-const ModuleModel = model<IModuleDocument>("Module", ModuleSchema, "VrijeKeuzeModules");
+const ModuleModel = model<IModuleDocument>("Module", ModuleSchema, "Modules");
 
 export default ModuleModel;
