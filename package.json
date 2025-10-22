@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "app.ts",
   "scripts": {
-    "start": "ts-node-dev app.ts"
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "ts-node-dev app.ts"
   },
   "author": "Rayan Magouri",
   "license": "ISC",
