@@ -1,45 +1,39 @@
-import User from "../../Domain/Entities/User"
-import IAuthRepository from "../../Domain/Repositories/IAuthRepository"
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
+import InputUserDTO from "../../Interface/DTOs/Input/InputUserDTO";
+import UserProfile from "../../Mapping/Profiles/UserProfile";
+import UserService from "./UserService";
 
-interface IAuthService {
-    register(user: User): Promise<void>,
-    login(user: User): Promise<string>,
-    getUserInfo(user: User): Promise<User>
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+import type { Mapper } from "@dynamic-mapper/mapper"
+
+export interface IAuthService  {
+    Register(inputUser: InputUserDTO): Promise<void>;
+    Login(inputUser: InputUserDTO): Promise<string>;
 }
 
 export default class AuthService implements IAuthService {
     constructor(
-        private readonly authRepository: IAuthRepository
+        private readonly userService: UserService,
+        private readonly mapper: Mapper
     ) {}
 
-    async register(user: User): Promise<void> {
-        if (!user.email.endsWith("@student.avans.nl")) {
-            throw new Error("You need to have an Avans Student email.");
-        }
+    async Register(inputUser: InputUserDTO): Promise<void> {
+        if (await this.userService.GetByEmail(inputUser)) throw new Error(`A User with E-Mail: ${inputUser.email} already exists.`);
 
-        const userAlreadyExists: boolean = await this.authRepository.findByEmail(user.email) == null? false : true;
-        if (userAlreadyExists) throw new Error("This email is already taken.");
+        inputUser.password = await bcrypt.hash(inputUser.password, 10);
 
-        user.password = await bcrypt.hash(user.password, 10);
-        await this.authRepository.createUser(user);
+        const user = this.mapper.map(UserProfile.InputToEntity, inputUser);
+        await this.userService.Add(user);
     }
 
-    async login(userInput: User): Promise<string> {
-        const user = await this.authRepository.findByEmail(userInput.email);
-        if (!user) throw new Error("This user doesn't exist.");
+    async Login(inputUser: InputUserDTO): Promise<string> {
+        const user = await this.userService.GetByEmail(inputUser);
+        if (!user) throw new Error(`A User with the E-Mail: ${inputUser.email} doesn't exist.`);
 
-        const passwordIsValid = await bcrypt.compare(userInput.password, user.password);
-        if (!passwordIsValid) throw new Error("Password is incorrect");
+        if (!await bcrypt.compare(inputUser.password, user.password)) throw new Error("The password is incorrect.");
 
-        const token = jwt.sign({ email: user.email }, process.env.JWT_KEY as string, { expiresIn: "1h" });
+        const token = jwt.sign({ id: user.id }, process.env.JWT_KEY as string, { expiresIn: "15m" });
         return token;
-    }
-
-    async getUserInfo(userInput: User): Promise<User> {
-        const user = await this.authRepository.findByEmail(userInput.email);
-        if (!user) throw new Error("This user doesn't exist.");
-        return user;
     }
 }

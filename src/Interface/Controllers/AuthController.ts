@@ -1,46 +1,47 @@
-import User from "../../Domain/Entities/User";
 import AuthService from "../../Application/Services/AuthService";
-import mapper from "../../mapper";
-import { OutputUser, LoginInputToUser, RegisterInputToUser } from "../../mapper";
+import UserService from "../../Application/Services/UserService";
+
 import type { Request, Response } from "express";
-import { InputLoginUserDTO, InputRegisterUserDTO } from "../DTOs/input";
+import type { Mapper } from "@dynamic-mapper/mapper";
+
+import UserProfile from "../../Mapping/Profiles/UserProfile";
+
+import InputUserDTO from "../DTOs/Input/InputUserDTO";
 
 export default class AuthController {
     constructor(
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
+        private readonly userService: UserService,
+        private readonly mapper: Mapper,
     ) {}
 
-    register = async (request: Request, response: Response): Promise<void> => {
-        const inputUserDTO = new InputRegisterUserDTO();
-        inputUserDTO.name = request.body.name;
-        inputUserDTO.email = request.body.email;
-        inputUserDTO.password = request.body.password;
+    Register = async (request: Request, response: Response): Promise<void> => {
+        const inputUser = response.locals.inputUser;
         
         try {
-            const user = mapper.map(RegisterInputToUser, inputUserDTO);
-            await this.authService.register(user);
-            response.status(200).send("User registered successfully.");
+            await this.authService.Register(inputUser);
+            response.status(201).send(`User with E-Mail: ${inputUser.email} has been created successfully.`);
         } catch (error: any) {
-            console.error(error);
+            console.log(error);
             response.status(500).send(error.message);
         }
     }
 
-    login = async (request: Request, response: Response): Promise<void> => {
-        const inputUserDTO = new InputLoginUserDTO();
-        inputUserDTO.email = request.body.email;
-        inputUserDTO.password = request.body.password;
-
+    Login = async (request: Request, response: Response): Promise<void> => {
         try {
-            const user = mapper.map(LoginInputToUser, inputUserDTO);
-            const token = await this.authService.login(user);
-            response.cookie("token", token, { httpOnly: true, secure: false, maxAge: 3600 * 1000});
-            const userInfo = await this.authService.getUserInfo(user);
-            const userOutput = mapper.map(OutputUser, userInfo);
+            const { email, password } = request.body;
+            const inputUser = new InputUserDTO("", email, password);
+
+            const token = await this.authService.Login(inputUser);
+            response.cookie("token", token, { httpOnly: true, secure: false, maxAge: 3600 * 1000 });
+
+            const user = await this.userService.GetByEmail(inputUser);
+            const userOutput = this.mapper.map(UserProfile.EntityToOutput, user);
+
             response.status(200).json(userOutput);
         } catch (error: any) {
-            console.error(error);
-            response.status(401).send(error.message);
+            console.log(error);
+            response.status(500).send(error.message);
         }
     }
 }

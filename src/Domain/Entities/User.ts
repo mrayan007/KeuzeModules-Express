@@ -1,13 +1,21 @@
+import BaseEntity from "./BaseEntity";
+
 interface IUser {
-    name: string | null,
-    email: string,
-    password: string
+    id: string;
+    name?: string;
+    email?: string;
+    password?: string;
+    favoriteModules?: string[];
 }
 
-export default class User implements IUser {
+export default class User extends BaseEntity implements IUser {
     constructor(
-        public name: string | null,
+        public id: string,
+        public name: string,
         public email: string,
-        public password: string
-    ) {}
+        public password: string,
+        public favoriteModules: string[]
+    ) {
+        super(id);
+    }
 }

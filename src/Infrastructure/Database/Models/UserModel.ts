@@ -1,16 +1,26 @@
-import { Document, Schema, model } from "mongoose";
+import { Schema, Document, Types, model } from "mongoose";
 
-interface IUserDocument extends Document {
-    name: string,
-    email: string,
-    password: string
+export interface IUserDocument extends Document {
+    _id: Types.ObjectId;
+    name: string;
+    email: string;
+    password: string;
+    favoriteModules: Types.ObjectId[];
 }
 
-const UserSchema = new Schema<IUserDocument>({
-    name: { type: String, required: true },
-    email: { type: String, unique: true, required: true },
-    password: { type: String, required: true}
-});
+const UserSchema = new Schema<IUserDocument>(
+    {
+        name: { type: String, required: true },
+        email: { type: String, required: true, unique: true },
+        password: { type: String, required: true },
+        favoriteModules: [ { type: Types.ObjectId, ref: "Module" } ]
+    },
 
-const UserModel = model<IUserDocument>("User", UserSchema, "Users");
+    {
+        versionKey: false,
+        strict: true
+    }
+);
+
+const UserModel = model("User", UserSchema, "Users");
 export default UserModel;

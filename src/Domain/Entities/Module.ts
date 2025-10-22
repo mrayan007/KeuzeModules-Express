@@ -1,27 +1,31 @@
+import BaseEntity from "./BaseEntity";
+
 interface IModule {
-    id: number,
-    name: string,
-    shortDescription: string,
-    description: string,
-    content: string,
-    credits: number,
-    location: string,
-    contactId: number,
-    level: string,
-    learningOutcomes: string
+    id: string;
+    name?: string;
+    shortDescription?: string;
+    description?: string;
+    content?: string;
+    studyCredits?: number;
+    location?: string;
+    contactId?: number;
+    level?: string;
+    learningOutcomes?: string;
 }
 
-export default class Module implements IModule {
+export default class Module extends BaseEntity implements IModule {
     constructor(
-        public readonly id: number,
-        public readonly name: string,
-        public readonly shortDescription: string,
-        public readonly description: string,
-        public readonly content: string,
-        public readonly credits: number,
-        public readonly location: string,
-        public readonly contactId: number,
-        public readonly level: string,
-        public readonly learningOutcomes: string
-    ) {}
+        public id: string,
+        public name: string,
+        public shortDescription: string,
+        public description: string,
+        public content: string,
+        public studyCredits: number,
+        public location: string,
+        public contactId: number,
+        public level: string,
+        public learningOutcomes: string
+    ) {
+        super(id);
+    }
 }
