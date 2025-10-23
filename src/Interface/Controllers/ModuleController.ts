@@ -13,8 +13,9 @@
 
         GetModules = async (request: Request, response: Response): Promise<void> => {
             let where: FilterQuery<IModuleDocument> = {};
-            const { name, studyCredits, level, location } = request.query;
+            const { id, name, studyCredits, level, location } = request.query;
 
+            if (id) where.id = id;
             if (name) where.name = name;
             if (studyCredits) where.studycredit = Number(studyCredits);
             if (level) where.level = level;
