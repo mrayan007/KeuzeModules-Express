@@ -15,6 +15,8 @@ import type { Express } from "express";
 const app : Express = express();
 const port : string | string = process.env.PORT || "3000";
 
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(cookieParser());
 
