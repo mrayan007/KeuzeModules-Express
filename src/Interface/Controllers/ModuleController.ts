@@ -15,7 +15,7 @@
             let where: FilterQuery<IModuleDocument> = {};
             const { id, name, studyCredits, level, location } = request.query;
 
-            if (id) where.id = id;
+            if (id) where._id = id;
             if (name) where.name = name;
             if (studyCredits) where.studycredit = Number(studyCredits);
             if (level) where.level = level;
