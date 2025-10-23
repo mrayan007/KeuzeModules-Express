@@ -33,7 +33,7 @@ export default class AuthController {
             const inputUser = new InputUserDTO("", email, password);
 
             const token = await this.authService.Login(inputUser);
-            response.cookie("token", token, { httpOnly: true, secure: false, maxAge: 3600 * 1000 });
+            response.cookie("token", token, { httpOnly: true, secure: false,  sameSite: "none",maxAge: 3600 * 1000 });
 
             const user = await this.userService.GetByEmail(inputUser);
             const userOutput = this.mapper.map(UserProfile.EntityToOutput, user);
