@@ -15,7 +15,10 @@
             let where: FilterQuery<IModuleDocument> = {};
             const { id, name, studyCredits, level, location } = request.query;
 
-            if (id) where._id = id;
+            if (id) {
+                const idArray = id.toString().split(",").map(id => id.trim());
+                where._id = { $in: idArray };
+            } 
             if (name) where.name = name;
             if (studyCredits) where.studycredit = Number(studyCredits);
             if (level) where.level = level;
